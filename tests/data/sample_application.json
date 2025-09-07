@@ -1,0 +1,52 @@
+{
+  "personal_info": {
+    "date_of_birth": "1985-06-15",
+    "sin": "123456782",
+    "province": "ON"
+  },
+  "contact_info": {
+    "email": "john.doe@gmail.com",
+    "phone": "+1-416-555-0123",
+    "address": {
+      "street": "123 Main Street",
+      "city": "Toronto",
+      "province": "ON",
+      "postal_code": "M5V 3A8"
+    }
+  },
+  "financial_info": {
+    "annual_income": 75000,
+    "employment_status": "employed",
+    "employer": "Tech Corp Inc",
+    "employment_duration_months": 36
+  },
+  "loan_info": {
+    "amount": 25000,
+    "term_months": 60,
+    "down_payment": 5000,
+    "purpose": "vehicle_purchase"
+  },
+  "vehicle_info": {
+    "vin": "1HGBH41JXMN109186",
+    "year": 2020,
+    "make": "Honda",
+    "model": "Civic",
+    "trim": "LX",
+    "mileage": 15000,
+    "value": 30000,
+    "condition": "used"
+  },
+  "dealer_info": {
+    "dealer_id": "DEALER123",
+    "dealer_name": "Toronto Auto Sales",
+    "location": "Toronto, ON",
+    "license_number": "D12345"
+  },
+  "application_metadata": {
+    "application_source": "web",
+    "referral_code": null,
+    "marketing_campaign": "summer2024",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "session_id": "sess_abc123def456"
+  }
+}

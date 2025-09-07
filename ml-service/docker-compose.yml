@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  ml-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+      - LOG_FORMAT=text
+      - MODEL_PATH=/app/models
+      - CORS_ORIGINS=http://localhost:8080,http://localhost:3000
+    volumes:
+      - ./models:/app/models
+      - ./app:/app/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - fraud-detection
+
+  # Optional: Add a simple model training service
+  model-trainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "-c", "print('Model trainer placeholder - implement training pipeline here')"]
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+    environment:
+      - ENVIRONMENT=development
+    networks:
+      - fraud-detection
+    profiles:
+      - training
+
+networks:
+  fraud-detection:
+    driver: bridge
+    name: fraud-detection-network
+
+volumes:
+  models:
+    driver: local

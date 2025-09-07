@@ -1,0 +1,159 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: fraud-detector-db
+    environment:
+      POSTGRES_DB: fraud_detector_dev
+      POSTGRES_USER: fraud_user
+      POSTGRES_PASSWORD: fraud_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fraud_user -d fraud_detector_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: fraud-detector-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Laravel API
+  api:
+    build:
+      context: ./src/api
+      dockerfile: Dockerfile.dev
+    container_name: fraud-detector-api
+    ports:
+      - "8080:8000"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=fraud_detector_dev
+      - DB_USERNAME=fraud_user
+      - DB_PASSWORD=fraud_password
+      - QUEUE_CONNECTION=database
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ML_SERVICE_URL=http://ml-service:8000
+    volumes:
+      - ./src/api:/var/www/html
+      - ./data:/var/www/html/storage/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "
+        composer install &&
+        php artisan key:generate &&
+        php artisan migrate --force &&
+        php artisan db:seed --force &&
+        php artisan serve --host=0.0.0.0 --port=8000
+      "
+
+  # Queue Worker
+  worker:
+    build:
+      context: ./src/api
+      dockerfile: Dockerfile.dev
+    container_name: fraud-detector-worker
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=fraud_detector_dev
+      - DB_USERNAME=fraud_user
+      - DB_PASSWORD=fraud_password
+      - QUEUE_CONNECTION=database
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ML_SERVICE_URL=http://ml-service:8000
+    volumes:
+      - ./src/api:/var/www/html
+      - ./data:/var/www/html/storage/app/data
+    depends_on:
+      - postgres
+      - redis
+      - api
+    command: >
+      sh -c "
+        sleep 30 &&
+        php artisan queue:work --queue=fraud-detection --tries=3 --timeout=300
+      "
+
+  # ML Inference Service
+  ml-service:
+    build:
+      context: ./src/ml-service
+      dockerfile: Dockerfile.dev
+    container_name: fraud-detector-ml
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - MODEL_S3_BUCKET=fraud-models-dev
+      - AWS_REGION=ca-central-1
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./src/ml-service:/app
+      - ./data/models:/app/models
+    command: >
+      sh -c "
+        pip install -r requirements.txt &&
+        uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+      "
+
+  # Test Client (for API testing)
+  test-client:
+    build:
+      context: ./tests
+      dockerfile: Dockerfile
+    container_name: fraud-detector-tests
+    environment:
+      - API_BASE_URL=http://api:8000
+      - ML_SERVICE_URL=http://ml-service:8000
+    volumes:
+      - ./tests:/app/tests
+      - ./data:/app/data
+    depends_on:
+      - api
+      - ml-service
+    profiles:
+      - testing
+    command: >
+      sh -c "
+        echo 'Test client ready. Run: docker-compose exec test-client python -m pytest' &&
+        tail -f /dev/null
+      "
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: fraud-detector-network
