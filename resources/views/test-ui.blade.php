@@ -457,6 +457,89 @@
                     </div>
                 </div>
 
+                <!-- Enhanced LLM Adjudicator Controls -->
+                <div class="card mb-4" id="llmControlsCard" style="display: none;">
+                    <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
+                        <h5 class="mb-0">
+                            <i class="bi bi-cpu me-2"></i>
+                            LLM Adjudicator Controls
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Circuit Breaker Status -->
+                        <div class="mb-3">
+                            <h6 class="text-primary">Circuit Breaker Status</h6>
+                            <div id="circuitBreakerStatus" class="d-flex align-items-center mb-2">
+                                <span class="status-indicator status-healthy me-2"></span>
+                                <span>CLOSED (Healthy)</span>
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-outline-warning btn-sm" onclick="resetCircuitBreaker()">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>
+                                    Reset Circuit Breaker
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Canary Testing -->
+                        <div class="mb-3">
+                            <h6 class="text-primary">Canary Testing</h6>
+                            <div id="canaryStatus" class="mb-2">
+                                <small class="text-muted">Last run: Not available</small>
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-outline-info btn-sm" onclick="runCanaryTest()">
+                                    <i class="bi bi-play-circle me-1"></i>
+                                    Run Canary Test
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Migration Testing -->
+                        <div class="mb-3">
+                            <h6 class="text-primary">Migration Testing</h6>
+                            <p class="small text-muted mb-2">Test all four decision outcomes (APPROVE, CONDITIONAL, DECLINE, REVIEW)</p>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-outline-success btn-sm" onclick="runMigrationTest()">
+                                    <i class="bi bi-check-square me-1"></i>
+                                    Run Migration Test
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Enhanced Features Status -->
+                        <div class="mb-0">
+                            <h6 class="text-primary">Enhanced Features</h6>
+                            <div class="row text-center">
+                                <div class="col-6 mb-2">
+                                    <div class="border rounded p-2">
+                                        <i class="bi bi-shield-check text-success"></i>
+                                        <small class="d-block">Four-Outcome Model</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <div class="border rounded p-2">
+                                        <i class="bi bi-file-text text-success"></i>
+                                        <small class="d-block">Auto-Stipulations</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <div class="border rounded p-2">
+                                        <i class="bi bi-eye-slash text-success"></i>
+                                        <small class="d-block">PII Redaction</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <div class="border rounded p-2">
+                                        <i class="bi bi-arrow-repeat text-success"></i>
+                                        <small class="d-block">Circuit Breaker</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Results -->
                 <div class="card mb-4" id="resultsCard" style="display: none;">
                     <div class="card-header">
@@ -1540,7 +1623,8 @@
             const container = document.getElementById('systemHealth');
             
             const services = Object.entries(health.services).map(([name, status]) => {
-                const statusClass = status.status === 'healthy' ? 'status-healthy' : 'status-unhealthy';
+                const statusClass = status.status === 'healthy' ? 'status-healthy' : 
+                                   status.status === 'degraded' ? 'status-degraded' : 'status-unhealthy';
                 const responseTime = status.response_time ? ` (${status.response_time}ms)` : '';
                 
                 // Special handling for queue worker to show additional info
@@ -1578,6 +1662,142 @@
                 </div>
                 ${services}
             `;
+
+            // Update LLM controls card based on LLM adjudicator status
+            const llmService = health.services.llm_adjudicator;
+            if (llmService) {
+                updateLLMControlsCard(llmService);
+            }
+        }
+
+        // Update LLM controls card with enhanced features
+        function updateLLMControlsCard(llmStatus) {
+            const controlsCard = document.getElementById('llmControlsCard');
+            
+            if (llmStatus.features) {
+                controlsCard.style.display = 'block';
+                
+                // Update circuit breaker status
+                const circuitBreakerStatus = document.getElementById('circuitBreakerStatus');
+                if (llmStatus.circuit_breaker) {
+                    const state = llmStatus.circuit_breaker.state;
+                    const statusClass = state === 'CLOSED' ? 'status-healthy' : 
+                                       state === 'HALF_OPEN' ? 'status-degraded' : 'status-unhealthy';
+                    const statusText = state === 'CLOSED' ? 'CLOSED (Healthy)' :
+                                      state === 'HALF_OPEN' ? 'HALF-OPEN (Testing)' : 'OPEN (Unhealthy)';
+                    
+                    circuitBreakerStatus.innerHTML = `
+                        <span class="status-indicator ${statusClass} me-2"></span>
+                        <span>${statusText}</span>
+                        ${llmStatus.circuit_breaker.failure_count > 0 ? 
+                            `<br><small class="text-muted ms-3">Failures: ${llmStatus.circuit_breaker.failure_count}</small>` : ''}
+                    `;
+                }
+                
+                // Update canary status
+                const canaryStatus = document.getElementById('canaryStatus');
+                if (llmStatus.canary_test) {
+                    const lastRun = llmStatus.canary_test.last_run ? 
+                        new Date(llmStatus.canary_test.last_run).toLocaleString() : 'Never';
+                    const success = llmStatus.canary_test.success;
+                    const outcome = llmStatus.canary_test.outcome;
+                    
+                    canaryStatus.innerHTML = `
+                        <small class="text-muted">
+                            Last run: ${lastRun}<br>
+                            ${success ? 
+                                `<span class="text-success">✓ Success</span>` : 
+                                `<span class="text-danger">✗ Failed</span>`}
+                            ${outcome ? ` (${outcome})` : ''}
+                        </small>
+                    `;
+                }
+            }
+        }
+
+        // Enhanced LLM adjudicator functions
+        async function resetCircuitBreaker() {
+            try {
+                const response = await fetch('/test-ui/reset-circuit-breaker', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Circuit breaker reset successfully!', 'success');
+                    refreshSystemHealth(); // Refresh to show updated status
+                } else {
+                    showToast('Failed to reset circuit breaker: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showToast('Error resetting circuit breaker: ' + error.message, 'error');
+            }
+        }
+
+        async function runCanaryTest() {
+            try {
+                showToast('Running canary test...', 'info');
+                
+                const response = await fetch('/test-ui/canary-test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const outcome = result.canary_result.outcome || 'Unknown';
+                    showToast(`Canary test completed! Outcome: ${outcome}`, 'success');
+                    refreshSystemHealth(); // Refresh to show updated status
+                } else {
+                    showToast('Canary test failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showToast('Error running canary test: ' + error.message, 'error');
+            }
+        }
+
+        async function runMigrationTest() {
+            try {
+                showToast('Running migration test...', 'info');
+                
+                const response = await fetch('/test-ui/migration-test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const testResults = result.migration_test_results;
+                    const passedTests = Object.values(testResults).filter(test => test.success).length;
+                    const totalTests = Object.keys(testResults).length;
+                    
+                    if (passedTests === totalTests) {
+                        showToast(`Migration test passed! All ${totalTests} outcomes tested successfully.`, 'success');
+                    } else {
+                        showToast(`Migration test partially failed: ${passedTests}/${totalTests} tests passed.`, 'warning');
+                    }
+                    
+                    // Show detailed results in console for debugging
+                    console.log('Migration test results:', testResults);
+                } else {
+                    showToast('Migration test failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showToast('Error running migration test: ' + error.message, 'error');
+            }
         }
 
         // Clear form

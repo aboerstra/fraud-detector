@@ -221,7 +221,7 @@ class TestUIController extends Controller
     }
 
     /**
-     * Check LLM Adjudicator health
+     * Check LLM Adjudicator health with enhanced Phase 3 features
      */
     private function checkLLMHealth(): array
     {
@@ -229,17 +229,168 @@ class TestUIController extends Controller
             $adjudicator = new LLMAdjudicator();
             $health = $adjudicator->getHealthStatus();
             
+            // Determine overall status based on circuit breaker and canary results
+            $overallStatus = 'healthy';
+            if ($health['circuit_breaker']['state'] === 'OPEN') {
+                $overallStatus = 'unhealthy';
+            } elseif ($health['circuit_breaker']['state'] === 'HALF_OPEN' || 
+                     ($health['canary_test']['success'] ?? false) === false) {
+                $overallStatus = 'degraded';
+            }
+            
             return [
-                'status' => $health['status'] === 'healthy' ? 'healthy' : 'unhealthy',
+                'status' => $overallStatus,
                 'response_time' => $health['response_time_ms'] ?? null,
                 'provider' => $health['provider'] ?? 'unknown',
-                'model' => $health['model'] ?? 'unknown'
+                'model' => $health['model'] ?? 'unknown',
+                'circuit_breaker' => [
+                    'state' => $health['circuit_breaker']['state'] ?? 'UNKNOWN',
+                    'failure_count' => $health['circuit_breaker']['failure_count'] ?? 0,
+                    'last_failure' => $health['circuit_breaker']['last_failure_time'] ?? null
+                ],
+                'canary_test' => [
+                    'success' => $health['canary_test']['success'] ?? false,
+                    'last_run' => $health['canary_test']['timestamp'] ?? null,
+                    'outcome' => $health['canary_test']['outcome'] ?? null
+                ],
+                'features' => [
+                    'four_outcome_model' => true,
+                    'auto_stipulations' => true,
+                    'pii_redaction' => true,
+                    'migration_testing' => true
+                ]
             ];
         } catch (\Exception $e) {
             return [
                 'status' => 'unhealthy',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'circuit_breaker' => [
+                    'state' => 'UNKNOWN',
+                    'failure_count' => 0
+                ],
+                'canary_test' => [
+                    'success' => false,
+                    'last_run' => null
+                ]
             ];
+        }
+    }
+    /**
+     * Test LLM adjudicator migration capabilities
+     */
+    public function testMigration(Request $request): JsonResponse
+    {
+        try {
+            $adjudicator = new LLMAdjudicator();
+            $results = $adjudicator->runMigrationTest();
+            
+            return response()->json([
+                'success' => true,
+                'migration_test_results' => $results,
+                'timestamp' => now()->toISOString()
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Migration test failed', [
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Run canary test on LLM adjudicator
+     */
+    public function runCanaryTest(Request $request): JsonResponse
+    {
+        try {
+            $adjudicator = new LLMAdjudicator();
+            
+            // Use the built-in canary test data
+            $canaryData = [
+                'personal_info' => [
+                    'first_name' => 'Test',
+                    'last_name' => 'Canary',
+                    'date_of_birth' => '1990-01-01',
+                    'sin' => '123456789',
+                    'email' => 'test@example.com',
+                    'phone' => '416-555-0123'
+                ],
+                'financial_info' => [
+                    'annual_income' => 75000,
+                    'employment_months' => 24,
+                    'employment_type' => 'full_time'
+                ],
+                'loan_info' => [
+                    'amount' => 25000,
+                    'term_months' => 60
+                ],
+                'vehicle_info' => [
+                    'year' => 2020,
+                    'make' => 'Toyota',
+                    'model' => 'Camry',
+                    'value' => 28000
+                ]
+            ];
+            
+            $result = $adjudicator->decide($canaryData, [], 0.5);
+            
+            return response()->json([
+                'success' => true,
+                'canary_result' => $result,
+                'timestamp' => now()->toISOString()
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Canary test failed', [
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Reset LLM adjudicator circuit breaker
+     */
+    public function resetCircuitBreaker(Request $request): JsonResponse
+    {
+        try {
+            $adjudicator = new LLMAdjudicator();
+            
+            // Reset circuit breaker by clearing static state
+            // This is a simplified approach - in production you might want more sophisticated reset logic
+            $reflection = new \ReflectionClass($adjudicator);
+            if ($reflection->hasProperty('circuitBreakerState')) {
+                $property = $reflection->getProperty('circuitBreakerState');
+                $property->setAccessible(true);
+                $property->setValue(null, [
+                    'state' => 'CLOSED',
+                    'failure_count' => 0,
+                    'last_failure_time' => null,
+                    'next_attempt_time' => null
+                ]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Circuit breaker reset successfully',
+                'timestamp' => now()->toISOString()
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Circuit breaker reset failed', [
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
