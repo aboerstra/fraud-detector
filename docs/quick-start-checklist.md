@@ -22,7 +22,7 @@ Add these lines to your `.env` file:
 LLM_PROVIDER=openrouter
 OPENROUTER_API_KEY=your-actual-api-key-here
 LLM_ENDPOINT=https://openrouter.ai/api/v1/chat/completions
-LLM_MODEL=anthropic/claude-3-sonnet-20240229
+LLM_MODEL=anthropic/claude-sonnet-4
 LLM_TIMEOUT=30
 LLM_MAX_TOKENS=2000
 LLM_TEMPERATURE=0.1
