@@ -506,6 +506,52 @@
         <!-- Training Section -->
         <div id="training-section" style="display: none;">
             <div class="row">
+                <!-- Getting Started Guide -->
+                <div class="col-12 mb-4">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-lightbulb me-2"></i>
+                                Getting Started with Model Training
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6>Step-by-Step Training Process:</h6>
+                                    <ol class="mb-3">
+                                        <li><strong>Prepare Training Data:</strong> Upload a CSV file with fraud detection features and labels</li>
+                                        <li><strong>Validate Data Quality:</strong> System will check data completeness and quality</li>
+                                        <li><strong>Configure Training:</strong> Choose training parameters (we recommend starting with "Balanced" preset)</li>
+                                        <li><strong>Monitor Progress:</strong> Track training progress and performance metrics</li>
+                                        <li><strong>Evaluate Results:</strong> Review model performance and deploy if satisfactory</li>
+                                    </ol>
+                                    <div class="alert alert-warning">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        <strong>First time training?</strong> Start with our sample dataset to understand the process.
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-success" onclick="showDataSchemaGuide()">
+                                            <i class="bi bi-file-text me-2"></i>
+                                            View Data Schema Guide
+                                        </button>
+                                        <button class="btn btn-outline-info" onclick="downloadSampleDataset()">
+                                            <i class="bi bi-download me-2"></i>
+                                            Download Sample Dataset
+                                        </button>
+                                        <button class="btn btn-primary" onclick="showTrainingWizard()">
+                                            <i class="bi bi-play-circle me-2"></i>
+                                            Start Training Process
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Training Dashboard -->
                 <div class="col-12 mb-4">
                     <div class="card">
@@ -551,6 +597,16 @@
                                 </div>
                             </div>
                             
+                            <!-- Active Training Jobs Monitor -->
+                            <div class="row mt-4" id="activeTrainingSection" style="display: none;">
+                                <div class="col-12">
+                                    <h6>Active Training Jobs</h6>
+                                    <div id="activeTrainingJobs">
+                                        <!-- Active jobs will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="row mt-4">
                                 <div class="col-md-6">
                                     <h6>Quick Actions</h6>
@@ -579,6 +635,120 @@
                     </div>
                 </div>
 
+                <!-- Data Schema Guide Modal -->
+                <div class="modal fade" id="dataSchemaModal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-file-text me-2"></i>
+                                    Training Data Schema Guide
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Required Columns</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered">
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th>Column Name</th>
+                                                        <th>Type</th>
+                                                        <th>Description</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><code>is_fraud</code></td>
+                                                        <td>boolean</td>
+                                                        <td>Target variable (0=legitimate, 1=fraud)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>applicant_age</code></td>
+                                                        <td>integer</td>
+                                                        <td>Age of applicant in years</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>annual_income</code></td>
+                                                        <td>float</td>
+                                                        <td>Annual income in CAD</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>loan_amount</code></td>
+                                                        <td>float</td>
+                                                        <td>Requested loan amount</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>debt_to_income_ratio</code></td>
+                                                        <td>float</td>
+                                                        <td>Debt to income ratio (0-1)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>credit_score</code></td>
+                                                        <td>integer</td>
+                                                        <td>Credit score (300-850)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>employment_months</code></td>
+                                                        <td>integer</td>
+                                                        <td>Months at current employment</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>vehicle_age</code></td>
+                                                        <td>integer</td>
+                                                        <td>Age of vehicle in years</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>loan_to_value_ratio</code></td>
+                                                        <td>float</td>
+                                                        <td>Loan amount / vehicle value</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>previous_applications</code></td>
+                                                        <td>integer</td>
+                                                        <td>Number of previous applications</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Sample CSV Format</h6>
+                                        <pre class="bg-light p-3 rounded"><code>is_fraud,applicant_age,annual_income,loan_amount,debt_to_income_ratio,credit_score,employment_months,vehicle_age,loan_to_value_ratio,previous_applications
+0,35,75000,25000,0.35,720,24,3,0.85,0
+1,22,35000,45000,0.65,580,6,8,1.2,3
+0,45,95000,30000,0.25,780,60,2,0.75,1
+1,28,40000,35000,0.55,620,12,10,1.1,2</code></pre>
+                                        
+                                        <h6 class="mt-4">Data Quality Requirements</h6>
+                                        <ul class="list-unstyled">
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>Minimum 1,000 records recommended</li>
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>At least 5% fraud cases (positive class)</li>
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>No more than 10% missing values per column</li>
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>Balanced representation across age groups</li>
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>CSV format with header row</li>
+                                        </ul>
+                                        
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle me-2"></i>
+                                            <strong>Tip:</strong> The system will automatically validate your data and provide quality scores for each column.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" onclick="downloadSampleDataset()">
+                                    <i class="bi bi-download me-1"></i>
+                                    Download Sample
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Training Wizard Modal -->
                 <div class="modal fade" id="trainingWizardModal" tabindex="-1">
                     <div class="modal-dialog modal-lg">
@@ -587,13 +757,26 @@
                                 <h5 class="modal-title">
                                     <i class="bi bi-magic me-2"></i>
                                     Training Wizard
+                                    <span class="badge bg-secondary ms-2" id="wizardStepIndicator">Step 1 of 3</span>
                                 </h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body">
+                                <!-- Progress Bar -->
+                                <div class="progress mb-4" style="height: 8px;">
+                                    <div class="progress-bar" id="wizardProgressBar" style="width: 33%"></div>
+                                </div>
+
                                 <!-- Step 1: Dataset Selection -->
                                 <div id="wizard-step-1" class="wizard-step">
-                                    <h6 class="text-primary mb-3">Step 1: Select Training Dataset</h6>
+                                    <h6 class="text-primary mb-3">
+                                        <i class="bi bi-database me-2"></i>
+                                        Step 1: Select Training Dataset
+                                    </h6>
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-lightbulb me-2"></i>
+                                        Choose a dataset with at least 1,000 records and good quality score (>70%) for best results.
+                                    </div>
                                     <div id="datasetSelection">
                                         <div class="text-center">
                                             <div class="spinner-border text-primary"></div>
@@ -604,25 +787,42 @@
 
                                 <!-- Step 2: Training Configuration -->
                                 <div id="wizard-step-2" class="wizard-step" style="display: none;">
-                                    <h6 class="text-primary mb-3">Step 2: Training Configuration</h6>
+                                    <h6 class="text-primary mb-3">
+                                        <i class="bi bi-gear me-2"></i>
+                                        Step 2: Training Configuration
+                                    </h6>
+                                    <div class="alert alert-success">
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        For your first training, we recommend using the "Balanced" preset which provides good performance in reasonable time.
+                                    </div>
                                     <form id="trainingConfigForm">
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
-                                                <label class="form-label">Training Name</label>
-                                                <input type="text" class="form-control" name="name" required>
+                                                <label class="form-label">
+                                                    Training Name
+                                                    <i class="bi bi-question-circle text-muted" title="Give your training a descriptive name"></i>
+                                                </label>
+                                                <input type="text" class="form-control" name="name" required 
+                                                       placeholder="e.g., Fraud Model v2.0">
                                             </div>
                                             <div class="col-md-6 mb-3">
-                                                <label class="form-label">Training Preset</label>
-                                                <select class="form-select" name="preset">
-                                                    <option value="fast">Fast (Quick training, good for testing)</option>
-                                                    <option value="balanced" selected>Balanced (Recommended)</option>
-                                                    <option value="thorough">Thorough (Best accuracy, longer training)</option>
+                                                <label class="form-label">
+                                                    Training Preset
+                                                    <i class="bi bi-question-circle text-muted" title="Choose training speed vs accuracy tradeoff"></i>
+                                                </label>
+                                                <select class="form-select" name="preset" onchange="updatePresetDescription()">
+                                                    <option value="fast">Fast (5-10 minutes, good for testing)</option>
+                                                    <option value="balanced" selected>Balanced (15-30 minutes, recommended)</option>
+                                                    <option value="thorough">Thorough (45-90 minutes, best accuracy)</option>
                                                 </select>
+                                                <small class="text-muted" id="presetDescription">
+                                                    Balanced training provides good performance with reasonable training time.
+                                                </small>
                                             </div>
                                             <div class="col-12 mb-3">
-                                                <label class="form-label">Description</label>
+                                                <label class="form-label">Description (Optional)</label>
                                                 <textarea class="form-control" name="description" rows="2" 
-                                                         placeholder="Optional description of this training run"></textarea>
+                                                         placeholder="Describe what makes this training unique or what you're testing"></textarea>
                                             </div>
                                         </div>
                                         
@@ -632,21 +832,34 @@
                                                 <h2 class="accordion-header">
                                                     <button class="accordion-button collapsed" type="button" 
                                                             data-bs-toggle="collapse" data-bs-target="#advancedCollapse">
-                                                        Advanced Options
+                                                        <i class="bi bi-sliders me-2"></i>
+                                                        Advanced Options (Optional)
                                                     </button>
                                                 </h2>
                                                 <div id="advancedCollapse" class="accordion-collapse collapse">
                                                     <div class="accordion-body">
+                                                        <div class="alert alert-warning">
+                                                            <i class="bi bi-exclamation-triangle me-2"></i>
+                                                            Only modify these if you understand machine learning parameters.
+                                                        </div>
                                                         <div class="row">
                                                             <div class="col-md-6 mb-3">
-                                                                <label class="form-label">Cross-Validation Folds</label>
+                                                                <label class="form-label">
+                                                                    Cross-Validation Folds
+                                                                    <i class="bi bi-question-circle text-muted" title="Number of folds for cross-validation (3-10)"></i>
+                                                                </label>
                                                                 <input type="number" class="form-control" name="cv_folds" 
                                                                        value="5" min="3" max="10">
+                                                                <small class="text-muted">Higher values = more robust validation, longer training</small>
                                                             </div>
                                                             <div class="col-md-6 mb-3">
-                                                                <label class="form-label">Test Size (%)</label>
+                                                                <label class="form-label">
+                                                                    Test Size (%)
+                                                                    <i class="bi bi-question-circle text-muted" title="Percentage of data reserved for testing"></i>
+                                                                </label>
                                                                 <input type="number" class="form-control" name="test_size" 
                                                                        value="20" min="10" max="40">
+                                                                <small class="text-muted">Percentage of data held out for final testing</small>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -658,7 +871,10 @@
 
                                 <!-- Step 3: Review and Start -->
                                 <div id="wizard-step-3" class="wizard-step" style="display: none;">
-                                    <h6 class="text-primary mb-3">Step 3: Review and Start Training</h6>
+                                    <h6 class="text-primary mb-3">
+                                        <i class="bi bi-eye me-2"></i>
+                                        Step 3: Review and Start Training
+                                    </h6>
                                     <div id="trainingReview">
                                         <!-- Review content will be populated here -->
                                     </div>
@@ -680,6 +896,139 @@
                                     <i class="bi bi-play-fill me-1"></i>
                                     Start Training
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Training Monitor Modal -->
+                <div class="modal fade" id="trainingMonitorModal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-activity me-2"></i>
+                                    Training Monitor
+                                    <span class="badge bg-primary ms-2" id="monitorJobName">Job Name</span>
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <!-- Training Progress -->
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Training Progress</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span>Overall Progress</span>
+                                                    <span id="overallProgress">0%</span>
+                                                </div>
+                                                <div class="progress mb-3" style="height: 20px;">
+                                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                                         id="progressBar" style="width: 0%"></div>
+                                                </div>
+                                                <div class="row text-center">
+                                                    <div class="col-3">
+                                                        <small class="text-muted">Current Step</small>
+                                                        <div id="currentStep">Initializing</div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <small class="text-muted">Elapsed Time</small>
+                                                        <div id="elapsedTime">00:00:00</div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <small class="text-muted">Estimated Remaining</small>
+                                                        <div id="estimatedTime">Calculating...</div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <small class="text-muted">Status</small>
+                                                        <div id="trainingStatus">Running</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Real-time Metrics -->
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Real-time Metrics</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <canvas id="metricsChart" width="400" height="200"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <!-- Training Configuration -->
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Configuration</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div id="trainingConfig">
+                                                    <!-- Configuration details will be populated here -->
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Current Metrics -->
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Current Metrics</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row text-center">
+                                                    <div class="col-6 mb-3">
+                                                        <div class="border rounded p-2">
+                                                            <small class="text-muted">Accuracy</small>
+                                                            <div class="h6 mb-0" id="currentAccuracy">--</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6 mb-3">
+                                                        <div class="border rounded p-2">
+                                                            <small class="text-muted">Precision</small>
+                                                            <div class="h6 mb-0" id="currentPrecision">--</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6 mb-3">
+                                                        <div class="border rounded p-2">
+                                                            <small class="text-muted">Recall</small>
+                                                            <div class="h6 mb-0" id="currentRecall">--</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6 mb-3">
+                                                        <div class="border rounded p-2">
+                                                            <small class="text-muted">F1-Score</small>
+                                                            <div class="h6 mb-0" id="currentF1">--</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Training Log -->
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Training Log</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div id="trainingLog" style="height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.8rem;">
+                                                    <!-- Log entries will be populated here -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-danger" id="stopTrainingBtn" onclick="stopTraining()">
+                                    <i class="bi bi-stop-fill me-1"></i>
+                                    Stop Training
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </div>
@@ -1758,6 +2107,306 @@
                 showToast('Error uploading dataset: ' + error.message, 'error');
             }
         });
+
+        // Additional training functions
+        function showDataSchemaGuide() {
+            const modal = new bootstrap.Modal(document.getElementById('dataSchemaModal'));
+            modal.show();
+        }
+
+        function downloadSampleDataset() {
+            // Create sample CSV data
+            const sampleData = `is_fraud,applicant_age,annual_income,loan_amount,debt_to_income_ratio,credit_score,employment_months,vehicle_age,loan_to_value_ratio,previous_applications
+0,35,75000,25000,0.35,720,24,3,0.85,0
+1,22,35000,45000,0.65,580,6,8,1.2,3
+0,45,95000,30000,0.25,780,60,2,0.75,1
+1,28,40000,35000,0.55,620,12,10,1.1,2
+0,52,120000,40000,0.20,800,120,1,0.70,0
+1,19,25000,30000,0.80,550,3,12,1.5,5
+0,38,85000,28000,0.30,750,36,4,0.80,1
+1,31,45000,50000,0.60,600,18,15,1.3,4
+0,42,110000,35000,0.25,770,84,2,0.65,0
+1,26,30000,40000,0.75,570,8,10,1.4,6`;
+
+            // Create and download file
+            const blob = new Blob([sampleData], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'fraud_detection_sample_dataset.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Sample dataset downloaded successfully!', 'success');
+        }
+
+        function updatePresetDescription() {
+            const preset = document.querySelector('[name="preset"]').value;
+            const descriptions = {
+                'fast': 'Fast training uses fewer iterations and simpler parameters. Good for testing and quick experiments.',
+                'balanced': 'Balanced training provides good performance with reasonable training time. Recommended for most use cases.',
+                'thorough': 'Thorough training uses extensive hyperparameter optimization and cross-validation. Best accuracy but longer training time.'
+            };
+            
+            document.getElementById('presetDescription').textContent = descriptions[preset] || '';
+        }
+
+        // Training monitoring functionality
+        let trainingMonitorInterval = null;
+        let metricsChart = null;
+
+        function showTrainingMonitor(jobId, jobName) {
+            document.getElementById('monitorJobName').textContent = jobName;
+            
+            // Initialize metrics chart
+            initializeMetricsChart();
+            
+            // Start monitoring
+            startTrainingMonitor(jobId);
+            
+            const modal = new bootstrap.Modal(document.getElementById('trainingMonitorModal'));
+            modal.show();
+            
+            // Clean up when modal is closed
+            document.getElementById('trainingMonitorModal').addEventListener('hidden.bs.modal', function() {
+                stopTrainingMonitor();
+            });
+        }
+
+        function initializeMetricsChart() {
+            const ctx = document.getElementById('metricsChart').getContext('2d');
+            
+            if (metricsChart) {
+                metricsChart.destroy();
+            }
+            
+            metricsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Accuracy',
+                            data: [],
+                            borderColor: 'rgb(37, 99, 235)',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Precision',
+                            data: [],
+                            borderColor: 'rgb(5, 150, 105)',
+                            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Recall',
+                            data: [],
+                            borderColor: 'rgb(217, 119, 6)',
+                            backgroundColor: 'rgba(217, 119, 6, 0.1)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'F1-Score',
+                            data: [],
+                            borderColor: 'rgb(220, 38, 38)',
+                            backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        }
+
+        function startTrainingMonitor(jobId) {
+            if (trainingMonitorInterval) {
+                clearInterval(trainingMonitorInterval);
+            }
+            
+            trainingMonitorInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/api/training/jobs/${jobId}/status`);
+                    const status = await response.json();
+                    
+                    updateTrainingProgress(status);
+                    
+                    if (status.status === 'completed' || status.status === 'failed') {
+                        stopTrainingMonitor();
+                    }
+                } catch (error) {
+                    console.error('Training monitor error:', error);
+                }
+            }, 2000);
+        }
+
+        function stopTrainingMonitor() {
+            if (trainingMonitorInterval) {
+                clearInterval(trainingMonitorInterval);
+                trainingMonitorInterval = null;
+            }
+        }
+
+        function updateTrainingProgress(status) {
+            // Update progress bar
+            const progress = status.progress || 0;
+            document.getElementById('overallProgress').textContent = `${Math.round(progress * 100)}%`;
+            document.getElementById('progressBar').style.width = `${progress * 100}%`;
+            
+            // Update status information
+            document.getElementById('currentStep').textContent = status.current_step || 'Processing';
+            document.getElementById('trainingStatus').textContent = status.status || 'Running';
+            
+            // Update elapsed time
+            if (status.started_at) {
+                const elapsed = new Date() - new Date(status.started_at);
+                document.getElementById('elapsedTime').textContent = formatDuration(elapsed);
+            }
+            
+            // Update estimated time
+            if (status.estimated_completion) {
+                const remaining = new Date(status.estimated_completion) - new Date();
+                document.getElementById('estimatedTime').textContent = remaining > 0 ? formatDuration(remaining) : 'Almost done';
+            }
+            
+            // Update current metrics
+            if (status.current_metrics) {
+                document.getElementById('currentAccuracy').textContent = 
+                    status.current_metrics.accuracy ? `${Math.round(status.current_metrics.accuracy * 100)}%` : '--';
+                document.getElementById('currentPrecision').textContent = 
+                    status.current_metrics.precision ? `${Math.round(status.current_metrics.precision * 100)}%` : '--';
+                document.getElementById('currentRecall').textContent = 
+                    status.current_metrics.recall ? `${Math.round(status.current_metrics.recall * 100)}%` : '--';
+                document.getElementById('currentF1').textContent = 
+                    status.current_metrics.f1_score ? `${Math.round(status.current_metrics.f1_score * 100)}%` : '--';
+            }
+            
+            // Update metrics chart
+            if (status.metrics_history && metricsChart) {
+                updateMetricsChart(status.metrics_history);
+            }
+            
+            // Update training log
+            if (status.log_entries) {
+                updateTrainingLog(status.log_entries);
+            }
+            
+            // Update configuration display
+            if (status.configuration) {
+                updateTrainingConfig(status.configuration);
+            }
+        }
+
+        function updateMetricsChart(metricsHistory) {
+            const labels = metricsHistory.map((_, index) => `Epoch ${index + 1}`);
+            
+            metricsChart.data.labels = labels;
+            metricsChart.data.datasets[0].data = metricsHistory.map(m => m.accuracy || 0);
+            metricsChart.data.datasets[1].data = metricsHistory.map(m => m.precision || 0);
+            metricsChart.data.datasets[2].data = metricsHistory.map(m => m.recall || 0);
+            metricsChart.data.datasets[3].data = metricsHistory.map(m => m.f1_score || 0);
+            
+            metricsChart.update('none');
+        }
+
+        function updateTrainingLog(logEntries) {
+            const logContainer = document.getElementById('trainingLog');
+            const html = logEntries.slice(-20).map(entry => {
+                const timestamp = new Date(entry.timestamp).toLocaleTimeString();
+                return `<div class="mb-1"><span class="text-muted">[${timestamp}]</span> ${entry.message}</div>`;
+            }).join('');
+            
+            logContainer.innerHTML = html;
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function updateTrainingConfig(config) {
+            const configContainer = document.getElementById('trainingConfig');
+            const html = `
+                <table class="table table-sm">
+                    <tr><td><strong>Dataset:</strong></td><td>${config.dataset_name || 'N/A'}</td></tr>
+                    <tr><td><strong>Preset:</strong></td><td>${config.preset || 'N/A'}</td></tr>
+                    <tr><td><strong>CV Folds:</strong></td><td>${config.cv_folds || 'N/A'}</td></tr>
+                    <tr><td><strong>Test Size:</strong></td><td>${config.test_size ? Math.round(config.test_size * 100) + '%' : 'N/A'}</td></tr>
+                    <tr><td><strong>Records:</strong></td><td>${config.total_records || 'N/A'}</td></tr>
+                </table>
+            `;
+            configContainer.innerHTML = html;
+        }
+
+        function formatDuration(milliseconds) {
+            const seconds = Math.floor(milliseconds / 1000);
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        async function stopTraining() {
+            if (confirm('Are you sure you want to stop the training? This action cannot be undone.')) {
+                try {
+                    const response = await fetch(`/api/training/jobs/${currentTrainingJobId}/stop`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        showToast('Training stopped successfully', 'warning');
+                        stopTrainingMonitor();
+                    } else {
+                        showToast('Failed to stop training', 'error');
+                    }
+                } catch (error) {
+                    showToast('Error stopping training: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // Update wizard step indicators
+        function updateWizardStep() {
+            // Hide all steps
+            document.querySelectorAll('.wizard-step').forEach(step => {
+                step.style.display = 'none';
+            });
+            
+            // Show current step
+            document.getElementById(`wizard-step-${currentWizardStep}`).style.display = 'block';
+            
+            // Update step indicator
+            document.getElementById('wizardStepIndicator').textContent = `Step ${currentWizardStep} of 3`;
+            
+            // Update progress bar
+            const progressWidth = (currentWizardStep / 3) * 100;
+            document.getElementById('wizardProgressBar').style.width = `${progressWidth}%`;
+            
+            // Update buttons
+            const prevBtn = document.getElementById('wizardPrevBtn');
+            const nextBtn = document.getElementById('wizardNextBtn');
+            const startBtn = document.getElementById('wizardStartBtn');
+            
+            prevBtn.style.display = currentWizardStep > 1 ? 'inline-block' : 'none';
+            nextBtn.style.display = currentWizardStep < 3 ? 'inline-block' : 'none';
+            startBtn.style.display = currentWizardStep === 3 ? 'inline-block' : 'none';
+        }
     </script>
 </body>
 </html>
