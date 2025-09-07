@@ -145,12 +145,31 @@
     <!-- Navigation -->
     <nav class="navbar navbar-dark">
         <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">
-                <i class="bi bi-shield-check me-2"></i>
-                Fraud Detection Testing Interface
-            </span>
             <div class="d-flex align-items-center">
-                <span class="text-white-50 me-3">AI-Powered Testing</span>
+                <span class="navbar-brand mb-0 h1 me-4">
+                    <i class="bi bi-shield-check me-2"></i>
+                    Fraud Detection System
+                </span>
+                
+                <!-- Navigation Menu -->
+                <ul class="navbar-nav flex-row me-auto">
+                    <li class="nav-item me-3">
+                        <a class="nav-link active" href="#" onclick="showSection('testing')" id="nav-testing">
+                            <i class="bi bi-bug me-1"></i>
+                            Testing
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('training')" id="nav-training">
+                            <i class="bi bi-robot me-1"></i>
+                            Model Training
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="d-flex align-items-center">
+                <span class="text-white-50 me-3">AI-Powered Platform</span>
                 <button class="btn btn-outline-light btn-sm" onclick="refreshSystemHealth()">
                     <i class="bi bi-arrow-clockwise me-1"></i>
                     Refresh Status
@@ -160,9 +179,11 @@
     </nav>
 
     <div class="container-fluid py-4">
-        <div class="row">
-            <!-- Left Panel: Form and Controls -->
-            <div class="col-lg-8">
+        <!-- Testing Section -->
+        <div id="testing-section">
+            <div class="row">
+                <!-- Left Panel: Form and Controls -->
+                <div class="col-lg-8">
                 <!-- AI Test Data Generation -->
                 <div class="card mb-4">
                     <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
@@ -475,6 +496,252 @@
                                 <i class="bi bi-bug text-info me-2"></i>
                                 Invalid Data Test
                             </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Training Section -->
+        <div id="training-section" style="display: none;">
+            <div class="row">
+                <!-- Training Dashboard -->
+                <div class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
+                            <h4 class="mb-0">
+                                <i class="bi bi-robot me-2"></i>
+                                Model Training Dashboard
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="text-center p-3 border rounded">
+                                        <i class="bi bi-cpu text-primary" style="font-size: 2rem;"></i>
+                                        <h5 class="mt-2">Current Model</h5>
+                                        <p class="text-muted mb-0">v1.0.0 (Production)</p>
+                                        <small class="text-success">85% Accuracy</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center p-3 border rounded">
+                                        <i class="bi bi-graph-up text-success" style="font-size: 2rem;"></i>
+                                        <h5 class="mt-2">Training Jobs</h5>
+                                        <p class="text-muted mb-0" id="trainingJobsCount">Loading...</p>
+                                        <small class="text-muted">This month</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center p-3 border rounded">
+                                        <i class="bi bi-database text-info" style="font-size: 2rem;"></i>
+                                        <h5 class="mt-2">Datasets</h5>
+                                        <p class="text-muted mb-0" id="datasetsCount">Loading...</p>
+                                        <small class="text-muted">Available</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center p-3 border rounded">
+                                        <i class="bi bi-lightning text-warning" style="font-size: 2rem;"></i>
+                                        <h5 class="mt-2">Performance</h5>
+                                        <p class="text-muted mb-0">92% Precision</p>
+                                        <small class="text-success">↑ 3% vs last model</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <h6>Quick Actions</h6>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-primary" onclick="showTrainingWizard()">
+                                            <i class="bi bi-plus-circle me-2"></i>
+                                            Start New Training
+                                        </button>
+                                        <button class="btn btn-outline-secondary" onclick="showDatasetManager()">
+                                            <i class="bi bi-upload me-2"></i>
+                                            Upload Dataset
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Recent Training Jobs</h6>
+                                    <div id="recentTrainingJobs">
+                                        <div class="text-center text-muted">
+                                            <div class="spinner-border spinner-border-sm me-2"></div>
+                                            Loading recent jobs...
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Training Wizard Modal -->
+                <div class="modal fade" id="trainingWizardModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-magic me-2"></i>
+                                    Training Wizard
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Step 1: Dataset Selection -->
+                                <div id="wizard-step-1" class="wizard-step">
+                                    <h6 class="text-primary mb-3">Step 1: Select Training Dataset</h6>
+                                    <div id="datasetSelection">
+                                        <div class="text-center">
+                                            <div class="spinner-border text-primary"></div>
+                                            <p class="mt-2">Loading available datasets...</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 2: Training Configuration -->
+                                <div id="wizard-step-2" class="wizard-step" style="display: none;">
+                                    <h6 class="text-primary mb-3">Step 2: Training Configuration</h6>
+                                    <form id="trainingConfigForm">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Training Name</label>
+                                                <input type="text" class="form-control" name="name" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Training Preset</label>
+                                                <select class="form-select" name="preset">
+                                                    <option value="fast">Fast (Quick training, good for testing)</option>
+                                                    <option value="balanced" selected>Balanced (Recommended)</option>
+                                                    <option value="thorough">Thorough (Best accuracy, longer training)</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-12 mb-3">
+                                                <label class="form-label">Description</label>
+                                                <textarea class="form-control" name="description" rows="2" 
+                                                         placeholder="Optional description of this training run"></textarea>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Advanced Options -->
+                                        <div class="accordion" id="advancedOptions">
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed" type="button" 
+                                                            data-bs-toggle="collapse" data-bs-target="#advancedCollapse">
+                                                        Advanced Options
+                                                    </button>
+                                                </h2>
+                                                <div id="advancedCollapse" class="accordion-collapse collapse">
+                                                    <div class="accordion-body">
+                                                        <div class="row">
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label">Cross-Validation Folds</label>
+                                                                <input type="number" class="form-control" name="cv_folds" 
+                                                                       value="5" min="3" max="10">
+                                                            </div>
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label">Test Size (%)</label>
+                                                                <input type="number" class="form-control" name="test_size" 
+                                                                       value="20" min="10" max="40">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Step 3: Review and Start -->
+                                <div id="wizard-step-3" class="wizard-step" style="display: none;">
+                                    <h6 class="text-primary mb-3">Step 3: Review and Start Training</h6>
+                                    <div id="trainingReview">
+                                        <!-- Review content will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" id="wizardPrevBtn" 
+                                        onclick="previousWizardStep()" style="display: none;">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    Previous
+                                </button>
+                                <button type="button" class="btn btn-primary" id="wizardNextBtn" 
+                                        onclick="nextWizardStep()">
+                                    Next
+                                    <i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                                <button type="button" class="btn btn-success" id="wizardStartBtn" 
+                                        onclick="startTraining()" style="display: none;">
+                                    <i class="bi bi-play-fill me-1"></i>
+                                    Start Training
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dataset Manager Modal -->
+                <div class="modal fade" id="datasetManagerModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-database me-2"></i>
+                                    Dataset Manager
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Upload Section -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Upload New Dataset</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="datasetUploadForm">
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">Dataset Name</label>
+                                                    <input type="text" class="form-control" name="name" required>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">File</label>
+                                                    <input type="file" class="form-control" name="file" 
+                                                           accept=".csv,.json" required>
+                                                </div>
+                                                <div class="col-12 mb-3">
+                                                    <label class="form-label">Description</label>
+                                                    <textarea class="form-control" name="description" rows="2"></textarea>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-upload me-1"></i>
+                                                Upload Dataset
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Existing Datasets -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Existing Datasets</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="datasetsList">
+                                            <div class="text-center">
+                                                <div class="spinner-border text-primary"></div>
+                                                <p class="mt-2">Loading datasets...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1103,6 +1370,394 @@
             }
             showToast('Ready for new test!', 'success');
         }
+
+        // Section switching functionality
+        function showSection(sectionName) {
+            // Hide all sections
+            document.getElementById('testing-section').style.display = 'none';
+            document.getElementById('training-section').style.display = 'none';
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').style.display = 'block';
+            
+            // Update navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById('nav-' + sectionName).classList.add('active');
+            
+            // Load section-specific data
+            if (sectionName === 'training') {
+                loadTrainingDashboard();
+            }
+        }
+
+        // Training section functionality
+        async function loadTrainingDashboard() {
+            try {
+                // Load training jobs count
+                const jobsResponse = await fetch('/api/training/jobs?limit=10');
+                const jobs = await jobsResponse.json();
+                document.getElementById('trainingJobsCount').textContent = jobs.length;
+                
+                // Load datasets count
+                const datasetsResponse = await fetch('/api/training/datasets?limit=100');
+                const datasets = await datasetsResponse.json();
+                document.getElementById('datasetsCount').textContent = datasets.length;
+                
+                // Load recent training jobs
+                displayRecentTrainingJobs(jobs.slice(0, 5));
+                
+            } catch (error) {
+                console.error('Failed to load training dashboard:', error);
+                document.getElementById('trainingJobsCount').textContent = 'Error';
+                document.getElementById('datasetsCount').textContent = 'Error';
+            }
+        }
+
+        function displayRecentTrainingJobs(jobs) {
+            const container = document.getElementById('recentTrainingJobs');
+            
+            if (jobs.length === 0) {
+                container.innerHTML = '<p class="text-muted">No recent training jobs</p>';
+                return;
+            }
+            
+            const html = jobs.map(job => {
+                const statusClass = {
+                    'completed': 'text-success',
+                    'running': 'text-primary',
+                    'failed': 'text-danger',
+                    'queued': 'text-warning'
+                }[job.status] || 'text-muted';
+                
+                return `
+                    <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                        <div>
+                            <small class="fw-bold">${job.name}</small>
+                            <br>
+                            <small class="text-muted">${new Date(job.created_at).toLocaleDateString()}</small>
+                        </div>
+                        <span class="badge ${statusClass}">${job.status}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+
+        // Training wizard functionality
+        let currentWizardStep = 1;
+        let selectedDataset = null;
+
+        function showTrainingWizard() {
+            currentWizardStep = 1;
+            selectedDataset = null;
+            updateWizardStep();
+            loadAvailableDatasets();
+            
+            const modal = new bootstrap.Modal(document.getElementById('trainingWizardModal'));
+            modal.show();
+        }
+
+        function updateWizardStep() {
+            // Hide all steps
+            document.querySelectorAll('.wizard-step').forEach(step => {
+                step.style.display = 'none';
+            });
+            
+            // Show current step
+            document.getElementById(`wizard-step-${currentWizardStep}`).style.display = 'block';
+            
+            // Update buttons
+            const prevBtn = document.getElementById('wizardPrevBtn');
+            const nextBtn = document.getElementById('wizardNextBtn');
+            const startBtn = document.getElementById('wizardStartBtn');
+            
+            prevBtn.style.display = currentWizardStep > 1 ? 'inline-block' : 'none';
+            nextBtn.style.display = currentWizardStep < 3 ? 'inline-block' : 'none';
+            startBtn.style.display = currentWizardStep === 3 ? 'inline-block' : 'none';
+        }
+
+        function nextWizardStep() {
+            if (currentWizardStep === 1 && !selectedDataset) {
+                showToast('Please select a dataset first', 'warning');
+                return;
+            }
+            
+            if (currentWizardStep === 2) {
+                const form = document.getElementById('trainingConfigForm');
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+                populateTrainingReview();
+            }
+            
+            currentWizardStep++;
+            updateWizardStep();
+        }
+
+        function previousWizardStep() {
+            currentWizardStep--;
+            updateWizardStep();
+        }
+
+        async function loadAvailableDatasets() {
+            try {
+                const response = await fetch('/api/training/datasets?status=ready');
+                const datasets = await response.json();
+                
+                const container = document.getElementById('datasetSelection');
+                
+                if (datasets.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center text-muted">
+                            <i class="bi bi-database" style="font-size: 3rem;"></i>
+                            <p class="mt-2">No datasets available</p>
+                            <button class="btn btn-primary" onclick="showDatasetManager()">
+                                Upload Dataset
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const html = datasets.map(dataset => `
+                    <div class="card mb-2 dataset-option" data-dataset-id="${dataset.id}" 
+                         onclick="selectDataset(${dataset.id}, '${dataset.name}')">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">${dataset.name}</h6>
+                                    <p class="text-muted mb-1">${dataset.description || 'No description'}</p>
+                                    <small class="text-muted">
+                                        ${dataset.record_count} records • ${dataset.formatted_file_size}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-success">Ready</span>
+                                    <br>
+                                    <small class="text-muted">Quality: ${Math.round(dataset.quality_score * 100)}%</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                container.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Failed to load datasets:', error);
+                document.getElementById('datasetSelection').innerHTML = `
+                    <div class="text-center text-danger">
+                        <p>Failed to load datasets</p>
+                        <button class="btn btn-outline-primary" onclick="loadAvailableDatasets()">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function selectDataset(datasetId, datasetName) {
+            selectedDataset = { id: datasetId, name: datasetName };
+            
+            // Update visual selection
+            document.querySelectorAll('.dataset-option').forEach(option => {
+                option.classList.remove('border-primary');
+            });
+            document.querySelector(`[data-dataset-id="${datasetId}"]`).classList.add('border-primary');
+            
+            showToast(`Selected dataset: ${datasetName}`, 'success');
+        }
+
+        function populateTrainingReview() {
+            const form = document.getElementById('trainingConfigForm');
+            const formData = new FormData(form);
+            
+            const config = {
+                name: formData.get('name'),
+                preset: formData.get('preset'),
+                description: formData.get('description'),
+                cv_folds: formData.get('cv_folds'),
+                test_size: formData.get('test_size')
+            };
+            
+            const html = `
+                <div class="card">
+                    <div class="card-body">
+                        <h6>Training Configuration Summary</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Dataset:</strong></td>
+                                <td>${selectedDataset.name}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Training Name:</strong></td>
+                                <td>${config.name}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Preset:</strong></td>
+                                <td>${config.preset}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cross-Validation:</strong></td>
+                                <td>${config.cv_folds} folds</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Test Size:</strong></td>
+                                <td>${config.test_size}%</td>
+                            </tr>
+                        </table>
+                        ${config.description ? `<p><strong>Description:</strong> ${config.description}</p>` : ''}
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Training will begin immediately after clicking "Start Training". 
+                            You can monitor progress from the dashboard.
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('trainingReview').innerHTML = html;
+        }
+
+        async function startTraining() {
+            const form = document.getElementById('trainingConfigForm');
+            const formData = new FormData(form);
+            
+            const trainingRequest = {
+                dataset_id: selectedDataset.id,
+                name: formData.get('name'),
+                description: formData.get('description'),
+                preset: formData.get('preset'),
+                cv_folds: parseInt(formData.get('cv_folds')),
+                test_size: parseFloat(formData.get('test_size')) / 100,
+                created_by: 'user' // In a real app, this would be the authenticated user
+            };
+            
+            try {
+                const response = await fetch('/api/training/jobs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify(trainingRequest)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showToast('Training job started successfully!', 'success');
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('trainingWizardModal'));
+                    modal.hide();
+                    
+                    // Refresh dashboard
+                    loadTrainingDashboard();
+                } else {
+                    showToast('Failed to start training: ' + (result.message || 'Unknown error'), 'error');
+                }
+                
+            } catch (error) {
+                showToast('Error starting training: ' + error.message, 'error');
+            }
+        }
+
+        // Dataset manager functionality
+        function showDatasetManager() {
+            loadDatasetsList();
+            const modal = new bootstrap.Modal(document.getElementById('datasetManagerModal'));
+            modal.show();
+        }
+
+        async function loadDatasetsList() {
+            try {
+                const response = await fetch('/api/training/datasets');
+                const datasets = await response.json();
+                
+                const container = document.getElementById('datasetsList');
+                
+                if (datasets.length === 0) {
+                    container.innerHTML = '<p class="text-muted">No datasets uploaded yet</p>';
+                    return;
+                }
+                
+                const html = datasets.map(dataset => {
+                    const statusClass = {
+                        'ready': 'bg-success',
+                        'processing': 'bg-warning',
+                        'error': 'bg-danger',
+                        'uploading': 'bg-info'
+                    }[dataset.status] || 'bg-secondary';
+                    
+                    return `
+                        <div class="card mb-2">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">${dataset.name}</h6>
+                                        <p class="text-muted mb-1">${dataset.description || 'No description'}</p>
+                                        <small class="text-muted">
+                                            ${dataset.record_count} records • ${dataset.formatted_file_size} • 
+                                            Uploaded ${new Date(dataset.created_at).toLocaleDateString()}
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge ${statusClass}">${dataset.status}</span>
+                                        ${dataset.quality_score ? `<br><small class="text-muted">Quality: ${Math.round(dataset.quality_score * 100)}%</small>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                container.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Failed to load datasets:', error);
+                document.getElementById('datasetsList').innerHTML = `
+                    <div class="text-center text-danger">
+                        <p>Failed to load datasets</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Dataset upload functionality
+        document.getElementById('datasetUploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/api/training/datasets/upload', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showToast('Dataset uploaded successfully!', 'success');
+                    this.reset();
+                    loadDatasetsList();
+                } else {
+                    showToast('Failed to upload dataset: ' + (result.message || 'Unknown error'), 'error');
+                }
+                
+            } catch (error) {
+                showToast('Error uploading dataset: ' + error.message, 'error');
+            }
+        });
     </script>
 </body>
 </html>
